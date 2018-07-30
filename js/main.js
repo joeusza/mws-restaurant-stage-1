@@ -160,25 +160,45 @@ createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  const imgurlbase = DBHelper.imageUrlForRestaurant(restaurant);
+  const imgparts = imgurlbase.split('.');
+  const imgurl1x = imgparts[0] + '_1x.' + imgparts[1];
+  const imgurl2x = imgparts[0] + '_2x.' + imgparts[1];
+  image.src = imgurl1x;
+  image.srcset = `${imgurl1x} 300w, ${imgurl1x} 600w`;
+  image.alt = restaurant.name + ` restaurant exterior, interior, or typical fare`;
   li.append(image);
 
-  const name = document.createElement('h1');
+  const div = document.createElement('div');
+  div.className = 'restaurant-text-area'
+  li.append(div);
+
+  const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
-  li.append(name);
+  div.append(name);
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
-  li.append(neighborhood);
+  div.append(neighborhood);
 
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
-  li.append(address);
+  div.append(address);
 
-  const more = document.createElement('a');
-  more.innerHTML = 'View Details';
-  more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more)
+  const more = document.createElement('button');
+  const moreLink = document.createElement('a');
+  moreLink.innerHTML = 'View Details';
+  moreLink.href = DBHelper.urlForRestaurant(restaurant);
+  more.append(moreLink);
+  // more.addEventListener('click', function() {
+  //   const url = DBHelper.urlForRestaurant(restaurant);
+  //   window.location = url;
+  // });
+  // more.onClick = function() {
+  //   const url = DBHelper.urlForRestaurant(restaurant);
+  //   window.location = url;
+  // }
+  div.append(more)
 
   return li
 }
