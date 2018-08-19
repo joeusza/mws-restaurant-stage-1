@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
@@ -29,18 +29,18 @@
 
     <section>
       <div class="flex-filter">
-      <div class="filter-options">
-        <div class="flex-h2">
-        <h2>Filter Results</h2>
+      <div class="filter-options" role="form" aria-labelledby="results">
+        <div class="flex-h2" id="filter" >
+        <h2 id="results">Filter Results</h2>
         </div>
         <div class="flex-neighborhoods">
-        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
-          <option value="all">All Neighborhoods</option>
+        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()" role="listbox" aria-label="Choose neighborhood" aria-owns="neigh">
+          <option value="all" id="neigh" role="option" aria-selected="true">All Neighborhoods</option>
         </select>
         </div>
         <div class="flex-cuisines">
-        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
-          <option value="all">All Cuisines</option>
+        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()" role="listbox" aria-label="Choose cuisine" aria-owns="cuis">
+          <option value="all" id="cuis" role="option" aria-selected="true">All Cuisines</option>
         </select>
         </div>
       </div>

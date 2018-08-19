@@ -33,7 +33,7 @@ ul, li {
 	color: #333;
 }
 a {
-	color: orange;
+	color: white;
 	text-decoration: none;
   min-height: 1.5em;
 }
@@ -73,8 +73,8 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 } */
 
 #footer {
-  background-color: #444;
-  color: #aaa;
+  background-color: #252831;
+  color: white;
   font-size: 16px;
   letter-spacing: 1px;
   padding: 25px;
@@ -126,7 +126,7 @@ nav h1 a {
 
 /* Add a color to all links inside the list */
 #breadcrumb li a {
-    color: #0275d8;
+    color: #362f9c;
 		min-height: 48px;
     text-decoration: none;
 }
@@ -153,12 +153,18 @@ nav h1 a {
 	}
 
 	.filter-options select {
+    /*aria role is https://www.w3.org/TR/wai-aria-1.1/#listbox  */
 	  background-color: white;
 	  font-family: Arial,sans-serif;
 		font-size: 16px;
 		min-height: 48px;
 	  letter-spacing: 0;
 	}
+
+  /* .filter-options select:focus {
+    color: #3397db;
+    padding-left: : 10px;
+  } */
 
 
 /* ====================== Restaurant Listing ====================== */
@@ -186,7 +192,7 @@ nav h1 a {
   width: 100%;
 }
 #restaurants-list li h2 {
-  color: #f18200;
+  color: #362f9c;
   font-family: Arial,sans-serif;
   /* font-size: 14pt; */
 	font-size: 18px;
@@ -210,7 +216,7 @@ nav h1 a {
 }
 
 #restaurants-list li button a {
-  background-color: orange;
+  background-color: #362f9c;
   /* border-bottom: 3px solid #eee; */
   color: #fff;
   display: inline-block;
@@ -254,7 +260,7 @@ nav h1 a {
 	/* width: 100%; */
 }
 #restaurant-name {
-  color: #f18200;
+  color: #362f9c;
   font-family: Arial,sans-serif;
   font-size: 20pt;
   font-weight: 200;
@@ -305,7 +311,7 @@ nav h1 a {
   padding: 30px 40px 80px;
 }
 #reviews-container h2 {
-  color: #f58500;
+  color: #362f9c;
   font-size: 24pt;
   font-weight: 300;
   letter-spacing: -1px;
@@ -489,6 +495,7 @@ nav h1 a {
 		flex-wrap: wrap;
 		flex-direction: row;
 		/* justify-content: center; */
+
 		/* align-items: center; */
 	}
 
@@ -577,7 +584,7 @@ nav h1 a {
 	}
 
 	.filter-options select {
-		width: 100%;
+		width: 160px;
 	}
 
   .flex-restaurants {
@@ -651,7 +658,7 @@ nav h1 a {
 	}
 
 	.filter-options select {
-		width: 20vw;
+		width: 180px;
 	}
 
   .flex-restaurants {
