@@ -1,3 +1,15 @@
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+  // suggested by https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
+  .then(function(reg) {
+    // registration worked
+    console.log(`Registration succeeded. Scope is ${reg.scope}`);
+  }).catch(function(error) {
+    // registration failed
+    console.log(`Registration failed with ${error}`);
+  });
+}
+
 let restaurants,
   neighborhoods,
   cuisines
@@ -166,24 +178,24 @@ createRestaurantHTML = (restaurant) => {
   const imgurl2x = imgparts[0] + '_2x.' + imgparts[1];
   image.src = imgurl1x;
   image.srcset = `${imgurl1x} 300w, ${imgurl1x} 600w`;
-  image.alt = restaurant.name + ` restaurant exterior, interior, or typical fare`;
+  image.alt = restaurant.name + ` restaurant`;
   li.append(image);
 
-  const div = document.createElement('div');
-  div.className = 'restaurant-text-area'
-  li.append(div);
+  // const div = document.createElement('div');
+  // div.className = 'restaurant-text-area'
+  // li.append(div);
 
   const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
-  div.append(name);
+  li.append(name);
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
-  div.append(neighborhood);
+  li.append(neighborhood);
 
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
-  div.append(address);
+  li.append(address);
 
   const more = document.createElement('button');
   const moreLink = document.createElement('a');
@@ -198,7 +210,7 @@ createRestaurantHTML = (restaurant) => {
   //   const url = DBHelper.urlForRestaurant(restaurant);
   //   window.location = url;
   // }
-  div.append(more)
+  li.append(more)
 
   return li
 }
