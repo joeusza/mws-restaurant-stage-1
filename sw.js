@@ -19,6 +19,7 @@ self.addEventListener('install', function(event) {
   );
 });
 
+// Delete old cache(s) so that only latest will be available
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
@@ -34,9 +35,12 @@ self.addEventListener('activate', function(event) {
   );
 });
 
+
+//  If request is not already in cache,
 self.addEventListener('fetch', function(event) {
   // console.log(event.request);
   let cacheRequest = event.request;
+  // Check if `restaurant.html` is anywhere in the requested URL. If it is, respond with the `restaurant.html` page.
   let restPage = 'restaurant.html';
   if (cacheRequest.url.indexOf(restPage) > -1) {
     cacheRequest = new Request(restPage);
@@ -44,6 +48,7 @@ self.addEventListener('fetch', function(event) {
 
   event.respondWith(
     caches.match(cacheRequest)
+    //  If request already in the cache, return it.  If not, fetch it, clone it, put the clone in the cache and return it.
     .then(function(response) {
       return response || fetch(cacheRequest)
       .then(function(nextResponse) {
@@ -56,36 +61,3 @@ self.addEventListener('fetch', function(event) {
     })
   );
 });
-
-// self.addEventListener('fetch', function(event) {
-//   event.respondWith(
-//     caches.match(event.request)
-//     .then(function(response) {
-//       if (response) return response;
-//         let requestClone = event.request.clone();
-//           return fetch(requestClone)
-//           .then(function(response) {
-//             if (!response) return response;
-//             let responseClone = response.clone();
-//             caches.open(staticCacheName)
-//             .then(function(cache) {
-//               cache.put(event.request, responseClone);
-//               return response;
-//             });
-//             });
-//     })
-//   );
-// });
-      // if (response) {return response}
-      // let requestClone = event.request.clone();
-      // return fetch(requestClone)
-      // .then(function(response) {
-      //   if (!response) return response;
-      //   let responseClone = response.clone();
-      //   caches.open(staticCacheName).then(function(cache) {
-      //     cache.put(event.request, responseClone);
-      //     return response;
-      //   });
-      // });
-    // });
-  // );
