@@ -36,13 +36,35 @@ class DBHelper {
   // .catch(error => callback(`Request failed. Returned status of ${error.statusText}`, null);
 
 
-  static fetchRestaurants(callback) {
-    fetch(`${DBHelper.DATABASE_URL}`)
+  static fetchRestaurants(callback, id) {
+    let fetchURL;
+    if (!id) {
+      fetchURL = DBHelper.DATABASE_URL;
+    } else {
+      fetchURL = `${DBHelper.DATABASE_URL}/${id}`;
+    }
+    console.log(fetchURL);
+    fetch(fetchURL)
+    // fetch(`${DBHelper.DATABASE_URL}`)
     .then(function(response) {
+      console.log(response.json);
       return response.json();
     })
     .then(data => callback(null, data))
-    .catch(error => callback(`Request failed. Returned status of ${error.statusText}`, null));
+    .catch(error => callback(`Request failed. Returned ${error}`, null));
+    // fetch(fetchURL, {method: 'GET'})
+    // fetch(fetchURL)
+    // .then(response => {
+    //   response.json.then(restaurants => {
+    //     console.log(`restaurants JSON: ${restaurants}`);
+    //     callback(null, restaurants);
+    //   });
+    // })
+    // .catch(error => {
+    //   callback(`Request failed. Returned ${error}`, null);
+    //   });
+
+    // callback(`Request failed. Returned status of ${error.statusText}`, null)
   }
 
   /**
