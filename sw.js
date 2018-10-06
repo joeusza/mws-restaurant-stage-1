@@ -1,14 +1,15 @@
-const staticCacheName = 'mws-restaurant-v11';
+const staticCacheName = 'mws-restaurant-v12';
 const mainAssets = [
   '/',
   '/index.html',
   '/restaurant.html',
   '/css/styles.css',
   // '/data/restaurants.json',
-  '/js/',
+  // '/js/',
   '/js/main.js',
-  // '/js/dbhelper.js',
-  // '/js/restaurant_info.js',
+  '/js/dbhelper.js',
+  '/js/restaurant_info.js',
+  'js/idb.js'
 ];
 
 self.addEventListener('install', function(event) {

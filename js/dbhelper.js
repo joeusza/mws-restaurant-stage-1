@@ -3,6 +3,8 @@
  */
 class DBHelper {
 
+
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -37,34 +39,35 @@ class DBHelper {
 
 
   static fetchRestaurants(callback, id) {
-    let fetchURL;
-    if (!id) {
-      fetchURL = DBHelper.DATABASE_URL;
-    } else {
-      fetchURL = `${DBHelper.DATABASE_URL}/${id}`;
-    }
+    const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+      switch(upgradeDb.oldVersion) {
+        case 0:
+        upgradeDb.createObjectStore('restaurants', {keypath: id});
+      }
+    });
+
+    let fetchURL = DBHelper.DATABASE_URL
     console.log(fetchURL);
     fetch(fetchURL)
-    // fetch(`${DBHelper.DATABASE_URL}`)
     .then(function(response) {
-      console.log(response.json);
+      let response2Json = response.clone().json()
+      .then(function(restObjs) {
+        function addRest2Db(restObj) {
+          // console.log(restObj.id);
+          return dbPromise.then(db => {
+          const tx = db.transaction('restaurants', 'readwrite');
+          tx.objectStore('restaurants').put(restObj, restObj.id);
+          return tx.complete;
+          });
+        }
+        for (const restObj of restObjs) {
+            addRest2Db(restObj);
+        }
+      });
       return response.json();
     })
     .then(data => callback(null, data))
     .catch(error => callback(`Request failed. Returned ${error}`, null));
-    // fetch(fetchURL, {method: 'GET'})
-    // fetch(fetchURL)
-    // .then(response => {
-    //   response.json.then(restaurants => {
-    //     console.log(`restaurants JSON: ${restaurants}`);
-    //     callback(null, restaurants);
-    //   });
-    // })
-    // .catch(error => {
-    //   callback(`Request failed. Returned ${error}`, null);
-    //   });
-
-    // callback(`Request failed. Returned status of ${error.statusText}`, null)
   }
 
   /**
@@ -78,6 +81,7 @@ class DBHelper {
       } else {
         const restaurant = restaurants.find(r => r.id == id);
         if (restaurant) { // Got the restaurant
+          console.log(`rest ${restaurant}`);
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
@@ -201,16 +205,39 @@ class DBHelper {
       })
       marker.addTo(newMap);
     return marker;
-  }
-  /* static mapMarkerForRestaurant(restaurant, map) {
-    const marker = new google.maps.Marker({
-      position: restaurant.latlng,
-      title: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP}
-    );
-    return marker;
-  } */
+    }
+
+
+
+
+  // /* static mapMarkerForRestaurant(restaurant, map) {
+  //   const marker = new google.maps.Marker({
+  //     position: restaurant.latlng,
+  //     title: restaurant.name,
+  //     url: DBHelper.urlForRestaurant(restaurant),
+  //     map: map,
+  //     animation: google.maps.Animation.DROP}
+  //   );
+  //   return marker;
+
+  // } */
 
 }
+
+
+  // console.log('store');
+  // const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+  //   const restRevStore = upgradeDb.createObjectStore('restRev');
+  //   restRevStore.put('world', 'hello');
+  // });
+
+
+
+
+    // let dbPromise = idb.open('rest-db', 1, function(upgradeDb) {
+    //   switch(upgradeDb.oldVersion) {
+    //     case 0:
+    //     const restaurantStore = upgradeDb.createObjectStore('restaurant');
+    //     restaurantStore.put("world", "hello");
+    //   }
+    // });
