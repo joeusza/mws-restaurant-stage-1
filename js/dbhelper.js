@@ -46,6 +46,12 @@ class DBHelper {
       }
     });
 
+    dbPromise.then(db => {
+      return db.transaction('restaurants')
+      .objectStore('restaurants').getAll();
+    }).then(allRestaurants => console.log(allRestaurants));
+
+
     let fetchURL = DBHelper.DATABASE_URL
     console.log(fetchURL);
     fetch(fetchURL)

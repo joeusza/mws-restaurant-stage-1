@@ -9,7 +9,7 @@ const mainAssets = [
   '/js/main.js',
   '/js/dbhelper.js',
   '/js/restaurant_info.js',
-  'js/idb.js'
+  '/js/idb.js'
 ];
 
 self.addEventListener('install', function(event) {
@@ -37,28 +37,28 @@ self.addEventListener('activate', function(event) {
 });
 
 
-//  If request is not already in cache,
-// self.addEventListener('fetch', function(event) {
-//   // console.log(event.request);
-//   let cacheRequest = event.request;
-//   // Check if `restaurant.html` is anywhere in the requested URL. If it is, respond with the `restaurant.html` page.
-//   let restPage = 'restaurant.html';
-//   if (cacheRequest.url.indexOf(restPage) > -1) {
-//     cacheRequest = new Request(restPage);
-//   }
+// //  If request is not already in cache,
+self.addEventListener('fetch', function(event) {
+  // console.log(event.request);
+  let cacheRequest = event.request;
+  // Check if `restaurant.html` is anywhere in the requested URL. If it is, respond with the `restaurant.html` page.
+  // let restPage = 'restaurant.html';
+  // if (cacheRequest.url.indexOf(restPage) > -1) {
+  //   cacheRequest = new Request(restPage);
+  // }
 //
-//   event.respondWith(
-//     caches.match(cacheRequest)
-//     //  If request already in the cache, return it.  If not, fetch it, clone it, put the clone in the cache and return it.
-//     .then(function(response) {
-//       return response || fetch(cacheRequest)
-//       .then(function(nextResponse) {
-//         return caches.open(staticCacheName)
-//         .then(function(cache) {
-//           cache.put(cacheRequest, nextResponse.clone());
-//           return nextResponse;
-//           });
-//       });
-//     })
-//   );
-// });
+  event.respondWith(
+    caches.match(cacheRequest)
+    //  If request already in the cache, return it.  If not, fetch it, clone it, put the clone in the cache and return it.
+    .then(function(response) {
+      return response || fetch(cacheRequest)
+      .then(function(nextResponse) {
+        return caches.open(staticCacheName)
+        .then(function(cache) {
+          cache.put(cacheRequest, nextResponse.clone());
+          return nextResponse;
+          });
+      });
+    })
+  );
+});
