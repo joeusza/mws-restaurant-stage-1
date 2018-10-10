@@ -39,6 +39,7 @@ class DBHelper {
 
 
   static fetchRestaurants(callback, id) {
+
     const dbPromise = idb.open('rest-db', 1, upgradeDb => {
       switch(upgradeDb.oldVersion) {
         case 0:
@@ -46,33 +47,61 @@ class DBHelper {
       }
     });
 
+    /**
+    could possibly be used as a part of a check to make sure that idb is only
+    updated when the number of restaurants returned from the fetch is less than
+    the number of restaurants in idb
+    */
+    // dbPromise.then(db => {
+    //   return db.transaction('restaurants')
+    //   .objectStore('restaurants').count()
+    //   .then(function(restCount) {
+    //     console.log(restCount);
+    //     return restCount;
+    //   });
+    
+
+
     dbPromise.then(db => {
       return db.transaction('restaurants')
       .objectStore('restaurants').getAll();
-    }).then(allRestaurants => console.log(allRestaurants));
-
+    }).then(function(allRestaurants) {
+      let restLength = allRestaurants.length;
+      if (restLength > 0) {
+        console.log(restLength);
+        console.log(allRestaurants);
+        // this does not work
+        // data has been retrieved from idb offline but is still unavailable to the user
+        return Promise.resolve(allRestaurants);
+        }
+    });
 
     let fetchURL = DBHelper.DATABASE_URL
     console.log(fetchURL);
     fetch(fetchURL)
     .then(function(response) {
+      // check needed here so that it only clones the reponse when idb actually needs to be updated
       let response2Json = response.clone().json()
       .then(function(restObjs) {
-        function addRest2Db(restObj) {
+          function addRest2Db(restObj) {
           // console.log(restObj.id);
           return dbPromise.then(db => {
           const tx = db.transaction('restaurants', 'readwrite');
           tx.objectStore('restaurants').put(restObj, restObj.id);
           return tx.complete;
-          });
-        }
-        for (const restObj of restObjs) {
-            addRest2Db(restObj);
-        }
+            });
+          }
+          for (const restObj of restObjs) {
+          addRest2Db(restObj);
+          }
       });
       return response.json();
     })
-    .then(data => callback(null, data))
+    // .then(data => callback(null, data))
+    .then(function(data) {
+      console.log(data);
+      callback(null, data);
+    })
     .catch(error => callback(`Request failed. Returned ${error}`, null));
   }
 
