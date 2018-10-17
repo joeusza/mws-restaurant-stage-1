@@ -196,6 +196,7 @@ class DBHelper {
         //       });
         //     }
         // })
+
         fetch(fetchURL)
         .then(function(response) {
                 return response.json();
@@ -207,7 +208,7 @@ class DBHelper {
         //   return db.transaction('restaurants', 'readonly')
         //   .objectStore('restaurants').getAll();
         //  })
-        //  .then(allRestaurants => callback(null, allRestaurants))
+        // .then(allRestaurants => callback(null, allRestaurants))
         .catch(error => callback(`Request failed. Returned ${error}`, null))
       }
 

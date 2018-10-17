@@ -1,6 +1,6 @@
 self.importScripts('/js/idb.js');
 
-const staticCacheName = 'mws-restaurant-v13';
+const staticCacheName = 'mws-restaurant-v1';
 const mainAssets = [
   '/',
   '/index.html',
@@ -37,20 +37,21 @@ self.addEventListener('install', function(event) {
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     createRestDB()
-  );
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.filter(function(cacheName) {
-          return cacheName.startsWith('mws-restaurant') &&
-                 cacheName != staticCacheName;
-        }).map(function(cacheName) {
-          return caches.delete(cacheName);
-        })
-      );
-    })
-  );
-});
+    );
+  });
+//   event.waitUntil(
+//     caches.keys().then(function(cacheNames) {
+//       return Promise.all(
+//         cacheNames.filter(function(cacheName) {
+//           return cacheName.startsWith('mws-restaurant') &&
+//                  cacheName != staticCacheName;
+//         }).map(function(cacheName) {
+//           return caches.delete(cacheName);
+//         })
+//       );
+//     })
+//   );
+// });
 //
 //
 // // //  If request is not already in cache,
@@ -86,8 +87,8 @@ if (event.request.url.includes('restaurants')) {
   }
 //
 // //
-  event.respondWith
-    caches.match(cacheRequest)
+  event.respondWith(caches.match(cacheRequest)
+    // problem previously caused by missing parentheses for event.respondWith caches.match(cacheRequest)
     //  If request already in the cache, return it.  If not, fetch it, clone it, put the clone in the cache and return it.
     .then(function(response) {
       return response || fetch(cacheRequest)
@@ -98,5 +99,5 @@ if (event.request.url.includes('restaurants')) {
           return nextResponse;
           });
       });
-    })
+    }));
 });
