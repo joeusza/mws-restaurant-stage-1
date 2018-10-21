@@ -15,10 +15,10 @@ const mainAssets = [
 ];
 
 function createRestDB() {
-  idb.open('rest-db', 1, upgradeDb => {
-    switch(upgradeDb.oldVersion) {
+  idb.open('rest-db', 1, upgradeDB => {
+    switch(upgradeDB.oldVersion) {
       case 0:
-      upgradeDb.createObjectStore('restaurants', {keypath: 'id'});
+      upgradeDB.createObjectStore('restaurants', {keypath: 'id'});
     }
   });
 }
@@ -90,12 +90,12 @@ if (event.request.url.includes('restaurants')) {
         for (const restObj of restObjs) {
             addRest2Db(restObj);
             }
-      return restObjs;
+      // return restObjs;
     })
     .then(function(finalResponse) {
       return new Response(JSON.stringify(finalResponse));
     });
-  );
+  ));
 
     // .then(finalResponse => {
     //   return new Response(JSON.stringify(finalResponse));
