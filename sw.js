@@ -65,9 +65,20 @@ if (event.request.url.includes('restaurants')) {
   event.respondWith(
     fetch(event.request)
     .then(fetchResponse => fetchResponse.json())
-    .then(function(resJson){
-      console.log(resJson);
-      return resJson;
+    .then(function(restObjs){
+      console.log(restObjs);
+        function addRest2Db(restObj) {
+          idb.open('rest-db', 1)
+          .then(db => {
+              const tx = db.transaction('restaurants', 'readwrite');
+              tx.objectStore('restaurants').put(restObj, restObj.id);
+              return tx.complete;
+            });
+          }
+        for (const restObj of restObjs) {
+            addRest2Db(restObj);
+            }
+      return restObjs;
     })
     .then(function(finalResponse) {
       // let finalClone = finalResponse.clone();
