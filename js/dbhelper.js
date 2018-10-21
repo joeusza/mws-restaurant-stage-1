@@ -160,7 +160,18 @@ class DBHelper {
 
 
     static fetchRestaurants(callback, id) {
-        let fetchURL = DBHelper.DATABASE_URL;
+        let fetchURL;
+        if (!id) {
+          fetchURL = DBHelper.DATABASE_URL;
+        } else {
+          fetchURL = `${DBHelper.DATABASE_URL}/${id}`;
+        }
+
+        // let fetchIdb = idb.open('rest-db', 1)
+        //         .then(db => {
+        //         return db.transaction('restaurants', 'readonly')
+        //         .objectStore('restaurants').getAll();
+        //        })
 
         // let dbChecked = false;
         //
@@ -209,7 +220,8 @@ class DBHelper {
         //   .objectStore('restaurants').getAll();
         //  })
         // .then(allRestaurants => callback(null, allRestaurants))
-        .catch(error => callback(`Request failed. Returned ${error}`, null))
+        // .catch(error => callback(`Request failed. Returned ${error}`, null))
+        .catch(error => callback(`Request failed. Returned ${error}`, null));
       }
 
 

@@ -61,24 +61,78 @@ self.addEventListener('fetch', function(event) {
 // const checkURL = new URL(event.request.url);
 if (event.request.url.includes('restaurants')) {
   console.log(event.request.url);
-  fetch(event.request.url)
-  .then(response => response.json())
-  .then(function(restObjs) {
-    function addRest2Db(restObj) {
-        // console.log(restObj.id);
-        idb.open('rest-db', 1)
-        .then(db => {
-        const tx = db.transaction('restaurants', 'readwrite');
-        tx.objectStore('restaurants').put(restObj, restObj.id);
-        return tx.complete;
-      });
-    }
-    for (const restObj of restObjs) {
-      addRest2Db(restObj);
-      }
-    });
-    return;
+
+  event.respondWith(
+    fetch(event.request)
+    .then(fetchResponse => fetchResponse.json())
+    .then(function(resJson){
+      console.log(resJson);
+      return resJson;
+    })
+    .then(function(finalResponse) {
+      // let finalClone = finalResponse.clone();
+      // console.log(finalClone);
+      return new Response(JSON.stringify(finalResponse));
+    }));
+    // .then(finalResponse => {
+    //   return new Response(JSON.stringify(finalResponse));
+    // }));
+
+
+  // idb.open('rest-db', 1)
+  // .then(db => {return db.transaction('restaurants', 'readonly')
+  // .objectStore('restaurants').getAll();
+  // })
+  // .then(function(allRestaurants) {
+  // let restLength = allRestaurants.length;
+  // if (restLength > 0) {
+  //   console.log('some');
+  //   return allRestaurants;
+  // } else {
+  //   console.log('none');
+  //   fetch(event.request.url)
+  //   .then(function(response) {
+  //     idb.open('rest-db', 1)
+  //     .then(db => {return db.transaction('restaurants', 'readonly')
+  //     return response.json();
+  //   });
+  // }
+  // }));
+
+
+  // if (restLength > 0) {
+  //   console.log('some')
+  //   return allRestaurants;
+  // } else {
+  //   console.log('none')
+  //   fetch(event.request.url)
+  //   .then(function(response) {
+  //           return response.json();
+
   }
+
+
+
+
+
+  //   .then(function(restObjs) {
+  //     function addRest2Db(restObj) {
+  //         // console.log(restObj.id);
+  //         idb.open('rest-db', 1)
+  //         .then(db => {
+  //         const tx = db.transaction('restaurants', 'readwrite');
+  //         tx.objectStore('restaurants').put(restObj, restObj.id);
+  //         return tx.complete;
+  //       });
+  //     }
+  //     for (const restObj of restObjs) {
+  //       addRest2Db(restObj);
+  //       }
+  //       console.log('got it!');
+  //     });
+  // });
+  // );
+  else {
   let cacheRequest = event.request;
   // Check if `restaurant.html` is anywhere in the requested URL. If it is, respond with the `restaurant.html` page.
   let restPage = 'restaurant.html';
@@ -100,4 +154,5 @@ if (event.request.url.includes('restaurants')) {
           });
       });
     }));
+  }
 });
