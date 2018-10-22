@@ -3,8 +3,6 @@
  */
 class DBHelper {
 
-
-
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -14,153 +12,16 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
-  /**
-   * Fetch all restaurants.
-   */
-  // static fetchRestaurants(callback) {
-  //   let xhr = new XMLHttpRequest();
-  //   xhr.open('GET', DBHelper.DATABASE_URL);
-  //   xhr.onload = () => {
-  //     if (xhr.status === 200) { // Got a success response from server!
-  //       const json = JSON.parse(xhr.responseText);
-  //       const restaurants = json.restaurants;
-  //       callback(null, restaurants);
-  //     } else { // Oops!. Got an error from server.
-  //       const error = (`Request failed. Returned status of ${xhr.status}`);
-  //       callback(error, null);
-  //     }
-  //   };
-  //   xhr.send();
-  // }
-
-  // .then(response => response.json())
-  // .then(data => callback(null, restaurants))
-  // .catch(error => callback(`Request failed. Returned status of ${error.statusText}`, null);
-
-  /**
-  could possibly be used as a part of a check to make sure that idb is only
-  updated when the number of restaurants returned from the fetch is less than
-  the number of restaurants in idb
-  */
-  // dbPromise.then(db => {
-  //   return db.transaction('restaurants')
-  //   .objectStore('restaurants').count()
-  //   .then(function(restCount) {
-  //     console.log(restCount);
-  //     return restCount;
-  //   });
-
-
-  // static fetchRestaurants(callback, id) {
-  //
-  //   const dbPromise = idb.open('rest-db', 1, upgradeDb => {
-  //     switch(upgradeDb.oldVersion) {
-  //       case 0:
-  //       upgradeDb.createObjectStore('restaurants', {keypath: id});
-  //     }
-  //   });
-  //
-  //   dbPromise.then(db => {
-  //     return db.transaction('restaurants')
-  //     .objectStore('restaurants').getAll();
-  //   }).then(function(allRestaurants) {
-  //     let restLength = allRestaurants.length;
-  //     if (restLength > 0) {
-  //       console.log(restLength);
-  //       console.log(allRestaurants);
-  //       // this does not work
-  //       // data has been retrieved from idb offline but is still unavailable to the user
-  //       return Promise.resolve(allRestaurants);
-  //       }
-  //   });
-  //
-  //   let fetchURL = DBHelper.DATABASE_URL
-  //   console.log(fetchURL);
-  //   fetch(fetchURL)
-  //   .then(function(response) {
-  //     // check needed here so that it only clones the reponse when idb actually needs to be updated
-  //     let response2Json = response.clone().json()
-  //     .then(function(restObjs) {
-  //         function addRest2Db(restObj) {
-  //         // console.log(restObj.id);
-  //         return dbPromise.then(db => {
-  //         const tx = db.transaction('restaurants', 'readwrite');
-  //         tx.objectStore('restaurants').put(restObj, restObj.id);
-  //         return tx.complete;
-  //           });
-  //         }
-  //         for (const restObj of restObjs) {
-  //         addRest2Db(restObj);
-  //         }
-  //     });
-  //     // this has to be an or return all restaurants
-  //     return response.json();
-  //   })
-  //   // .then(data => callback(null, data))
-  //   .then(function(data) {
-  //     console.log(data);
-  //     callback(null, data);
-  //   })
-  //   .catch(error => callback(`Request failed. Returned ${error}`, null));
-  // }
-
-
-
-  // static fetchRestaurants(callback, id) {
-  //     let fetchURL = DBHelper.DATABASE_URL;
-  //
-  //     const dbPromise = idb.open('rest-db', 1, upgradeDb => {
-  //       switch(upgradeDb.oldVersion) {
-  //         case 0:
-  //         upgradeDb.createObjectStore('restaurants', {keypath: id});
-  //       }
-  //     });
-
-    // dbPromise.then(db => {
-    //   return db.transaction('restaurants')
-    //     .objectStore('restaurants').getAll();
-    //     }).then(function(allRestaurants) {
-    //     let restLength = allRestaurants.length;
-    //     if (restLength > 0) {
-    //       console.log(restLength);
-    //       console.log(allRestaurants);
-    //       // this does not work
-    //       // data has been retrieved from idb offline but is still unavailable to the user
-    //       return allRestaurants;
-    //       } else {
-    //         fetch(fetchURL)
-    //         .then(function(response) {
-    //           let response2Json = response.clone().json()
-    //           .then(function(restObjs) {
-    //           function addRest2Db(restObj) {
-    //           // console.log(restObj.id);
-    //           return dbPromise.then(db => {
-    //           const tx = db.transaction('restaurants', 'readwrite');
-    //           tx.objectStore('restaurants').put(restObj, restObj.id);
-    //           return tx.complete;
-    //           });
-    //         }
-    //         for (const restObj of restObjs) {
-    //         addRest2Db(restObj);
-    //         }
-    //       });
-    //     console.log(response.json());
-    //     return response.json();
-    //   });
-    //     }
-    //   })
-    //   // .then(data => callback(null, data))
-    //   .then(function(data) {
-    //     console.log(data);
-    //     callback(null, data);
-    //   })
-    //   .catch(error => callback(`Request failed. Returned ${error}`, null))
-    // }
-
-
 
     static fetchRestaurants(callback, id) {
-      // comment
+      const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+         console.log("creating DB");
+         idb.open('rest-db', 1, upgradeDB => {
+             if (!upgradeDB.objectStoreNames.contains('restaurants')) {
+               upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
+             }
+           });
+       });
         let fetchURL;
         if (!id) {
           fetchURL = DBHelper.DATABASE_URL;
@@ -168,60 +29,28 @@ class DBHelper {
           fetchURL = `${DBHelper.DATABASE_URL}/${id}`;
         }
 
-        // let fetchIdb = idb.open('rest-db', 1)
-        //         .then(db => {
-        //         return db.transaction('restaurants', 'readonly')
-        //         .objectStore('restaurants').getAll();
-        //        })
-
-        // let dbChecked = false;
-        //
-        // const dbPromise = idb.open('rest-db', 1, upgradeDb => {
-        //   switch(upgradeDb.oldVersion) {
-        //     case 0:
-        //     upgradeDb.createObjectStore('restaurants', {keypath: id});
-        //   }
-        // });
-        //
-        // let allDbRestPromise = dbPromise.then(db => {
-        //   return db.transaction('restaurants')
-        //   .objectStore('restaurants').getAll();
-        // });
-
-
-
-        // dbPromise.then(db => {
-        //   return db.transaction('restaurants')
-        //   .objectStore('restaurants').getAll();
-        //   })
-        //   .then(function(allRestaurants) {
-        //     console.log(allRestaurants);
-        //     let restLength = allRestaurants.length;
-        //     console.log(restLength);
-        //     if (restLength > 0) {
-        //       return allRestaurants;
-        //     } else {
-        //       console.log(fetchURL);
-        //       fetch(fetchURL)
-        //       .then(function(response) {
-        //         return response.json();
-        //       });
-        //     }
-        // })
-
         fetch(fetchURL)
         .then(function(response) {
-                return response.json();
-        })
+          console.log(response.json());
+          return response.json();
+          })
+        // .then(function(response) {
+        //   let response2Json = response.clone().json()
+        //         .then(function(restObjs) {
+        //         function addRest2Db(restObj) {
+        //         return dbPromise.then(db => {
+        //         const tx = db.transaction('restaurants', 'readwrite');
+        //         tx.objectStore('restaurants').put(restObj, restObj.id);
+        //         return tx.complete;
+        //         });
+        //       }
+        //       for (const restObj of restObjs) {
+        //           addRest2Db(restObj);
+        //           }
+        //       });
+          // return response.json();
+        // })
         .then(data => callback(null, data))
-        // .catch(function getFromDb() {
-        //   idb.open('rest-db', 1)
-        //   .then(db => {
-        //   return db.transaction('restaurants', 'readonly')
-        //   .objectStore('restaurants').getAll();
-        //  })
-        // .then(allRestaurants => callback(null, allRestaurants))
-        // .catch(error => callback(`Request failed. Returned ${error}`, null))
         .catch(error => callback(`Request failed. Returned ${error}`, null));
       }
 
@@ -364,6 +193,46 @@ class DBHelper {
     }
 
 
+    // let fetchIdb = idb.open('rest-db', 1)
+    //         .then(db => {
+    //         return db.transaction('restaurants', 'readonly')
+    //         .objectStore('restaurants').getAll();
+    //        })
+
+    // let dbChecked = false;
+    //
+    // const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+    //   switch(upgradeDb.oldVersion) {
+    //     case 0:
+    //     upgradeDb.createObjectStore('restaurants', {keypath: id});
+    //   }
+    // });
+    //
+    // let allDbRestPromise = dbPromise.then(db => {
+    //   return db.transaction('restaurants')
+    //   .objectStore('restaurants').getAll();
+    // });
+
+
+
+    // dbPromise.then(db => {
+    //   return db.transaction('restaurants')
+    //   .objectStore('restaurants').getAll();
+    //   })
+    //   .then(function(allRestaurants) {
+    //     console.log(allRestaurants);
+    //     let restLength = allRestaurants.length;
+    //     console.log(restLength);
+    //     if (restLength > 0) {
+    //       return allRestaurants;
+    //     } else {
+    //       console.log(fetchURL);
+    //       fetch(fetchURL)
+    //       .then(function(response) {
+    //         return response.json();
+    //       });
+    //     }
+    // })
 
 
   // /* static mapMarkerForRestaurant(restaurant, map) {
@@ -397,3 +266,147 @@ class DBHelper {
     //     restaurantStore.put("world", "hello");
     //   }
     // });
+
+
+    /**
+     * Fetch all restaurants.
+     */
+    // static fetchRestaurants(callback) {
+    //   let xhr = new XMLHttpRequest();
+    //   xhr.open('GET', DBHelper.DATABASE_URL);
+    //   xhr.onload = () => {
+    //     if (xhr.status === 200) { // Got a success response from server!
+    //       const json = JSON.parse(xhr.responseText);
+    //       const restaurants = json.restaurants;
+    //       callback(null, restaurants);
+    //     } else { // Oops!. Got an error from server.
+    //       const error = (`Request failed. Returned status of ${xhr.status}`);
+    //       callback(error, null);
+    //     }
+    //   };
+    //   xhr.send();
+    // }
+
+    // .then(response => response.json())
+    // .then(data => callback(null, restaurants))
+    // .catch(error => callback(`Request failed. Returned status of ${error.statusText}`, null);
+
+    /**
+    could possibly be used as a part of a check to make sure that idb is only
+    updated when the number of restaurants returned from the fetch is less than
+    the number of restaurants in idb
+    */
+    // dbPromise.then(db => {
+    //   return db.transaction('restaurants')
+    //   .objectStore('restaurants').count()
+    //   .then(function(restCount) {
+    //     console.log(restCount);
+    //     return restCount;
+    //   });
+
+
+    // static fetchRestaurants(callback, id) {
+    //
+    //   const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+    //     switch(upgradeDb.oldVersion) {
+    //       case 0:
+    //       upgradeDb.createObjectStore('restaurants', {keypath: id});
+    //     }
+    //   });
+    //
+    //   dbPromise.then(db => {
+    //     return db.transaction('restaurants')
+    //     .objectStore('restaurants').getAll();
+    //   }).then(function(allRestaurants) {
+    //     let restLength = allRestaurants.length;
+    //     if (restLength > 0) {
+    //       console.log(restLength);
+    //       console.log(allRestaurants);
+    //       // this does not work
+    //       // data has been retrieved from idb offline but is still unavailable to the user
+    //       return Promise.resolve(allRestaurants);
+    //       }
+    //   });
+    //
+    //   let fetchURL = DBHelper.DATABASE_URL
+    //   console.log(fetchURL);
+    //   fetch(fetchURL)
+    //   .then(function(response) {
+    //     // check needed here so that it only clones the reponse when idb actually needs to be updated
+    //     let response2Json = response.clone().json()
+    //     .then(function(restObjs) {
+    //         function addRest2Db(restObj) {
+    //         // console.log(restObj.id);
+    //         return dbPromise.then(db => {
+    //         const tx = db.transaction('restaurants', 'readwrite');
+    //         tx.objectStore('restaurants').put(restObj, restObj.id);
+    //         return tx.complete;
+    //           });
+    //         }
+    //         for (const restObj of restObjs) {
+    //         addRest2Db(restObj);
+    //         }
+    //     });
+    //     // this has to be an or return all restaurants
+    //     return response.json();
+    //   })
+    //   // .then(data => callback(null, data))
+    //   .then(function(data) {
+    //     console.log(data);
+    //     callback(null, data);
+    //   })
+    //   .catch(error => callback(`Request failed. Returned ${error}`, null));
+    // }
+
+
+
+    // static fetchRestaurants(callback, id) {
+    //     let fetchURL = DBHelper.DATABASE_URL;
+    //
+    //     const dbPromise = idb.open('rest-db', 1, upgradeDb => {
+    //       switch(upgradeDb.oldVersion) {
+    //         case 0:
+    //         upgradeDb.createObjectStore('restaurants', {keypath: id});
+    //       }
+    //     });
+
+      // dbPromise.then(db => {
+      //   return db.transaction('restaurants')
+      //     .objectStore('restaurants').getAll();
+      //     }).then(function(allRestaurants) {
+      //     let restLength = allRestaurants.length;
+      //     if (restLength > 0) {
+      //       console.log(restLength);
+      //       console.log(allRestaurants);
+      //       // this does not work
+      //       // data has been retrieved from idb offline but is still unavailable to the user
+      //       return allRestaurants;
+      //       } else {
+      //         fetch(fetchURL)
+      //         .then(function(response) {
+      //           let response2Json = response.clone().json()
+      //           .then(function(restObjs) {
+      //           function addRest2Db(restObj) {
+      //           // console.log(restObj.id);
+      //           return dbPromise.then(db => {
+      //           const tx = db.transaction('restaurants', 'readwrite');
+      //           tx.objectStore('restaurants').put(restObj, restObj.id);
+      //           return tx.complete;
+      //           });
+      //         }
+      //         for (const restObj of restObjs) {
+      //         addRest2Db(restObj);
+      //         }
+      //       });
+      //     console.log(response.json());
+      //     return response.json();
+      //   });
+      //     }
+      //   })
+      //   // .then(data => callback(null, data))
+      //   .then(function(data) {
+      //     console.log(data);
+      //     callback(null, data);
+      //   })
+      //   .catch(error => callback(`Request failed. Returned ${error}`, null))
+      // }
