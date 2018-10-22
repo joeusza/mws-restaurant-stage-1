@@ -160,6 +160,7 @@ class DBHelper {
 
 
     static fetchRestaurants(callback, id) {
+      // comment
         let fetchURL;
         if (!id) {
           fetchURL = DBHelper.DATABASE_URL;
