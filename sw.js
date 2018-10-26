@@ -14,11 +14,11 @@ const mainAssets = [
   '/js/idb.js'
 ];
 
-function createRestDB() {
-  idb.open('rest-db', 1, upgradeDb => {
-    upgradeDb.createObjectStore('restaurants', {keypath: 'id'});
-  });
-}
+// function createRestDB() {
+//   idb.open('rest-db', 1, upgradeDb => {
+//     upgradeDb.createObjectStore('restaurants', {keypath: 'id'});
+//   });
+// }
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -28,12 +28,13 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// Delete old cache(s) so that only latest will be available
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    createRestDB()
-    );
-  });
+
+// self.addEventListener('activate', function(event) {
+//   event.waitUntil(
+//     createRestDB()
+//     );
+//     console.log('db created');
+//   });
 
 // //  If request is not already in cache,
 self.addEventListener('fetch', function(event) {

@@ -10,11 +10,11 @@ if ('serviceWorker' in navigator) {
     });
   }
 
-// const dbPromise = idb.open('rest-db', 1, upgradeDB => {
-//     // if (!upgradeDB.objectStoreNames.contains('restaurants')) {
-//     upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
-//       // }
-//   });
+const dbPromise = idb.open('rest-db', 1, upgradeDB => {
+    if (!upgradeDB.objectStoreNames.contains('restaurants')) {
+    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
+      }
+  });
 
 /**
  * Common database helper functions.
@@ -34,11 +34,29 @@ class DBHelper {
     static fetchRestaurants(callback) {
         const fetchURL = DBHelper.DATABASE_URL;
         fetch(fetchURL)
-        .then(response => response.json())
-        // console the data next
+        // .then(response => response.json())
+        .then(function(response) {
+          dbPromise
+          .then(db => {
+          return db.transaction('restaurants', 'readonly')
+          .objectStore('restaurants').getAll();
+        }).then(function(dbRestaurants) {
+          console.log('all stuffs', dbRestaurants);
+        });
+        return response.json();
+        })
+        // next move getALL to here!
         // .then(data => callback(null, data))
         .then(function(restObjs) {
-          console.log(restObjs)
+          dbPromise
+          .then(db => {
+            const tx = db.transaction('restaurants', 'readwrite');
+            const store = tx.objectStore('restaurants');
+            for (const restObj of restObjs) {
+              store.put(restObj);
+            }
+            return tx.complete;
+          });
           callback(null, restObjs);
         })
         .catch(error => callback(`Request failed. Returned ${error}`, null));
