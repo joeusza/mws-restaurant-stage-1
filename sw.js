@@ -1,5 +1,3 @@
-self.importScripts('/js/idb.js');
-
 const staticCacheName = 'mws-restaurant-v1';
 const mainAssets = [
   '/',
@@ -14,12 +12,6 @@ const mainAssets = [
   '/js/idb.js'
 ];
 
-// function createRestDB() {
-//   idb.open('rest-db', 1, upgradeDb => {
-//     upgradeDb.createObjectStore('restaurants', {keypath: 'id'});
-//   });
-// }
-
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(staticCacheName).then(function(cache) {
@@ -27,14 +19,6 @@ self.addEventListener('install', function(event) {
     })
   );
 });
-
-
-// self.addEventListener('activate', function(event) {
-//   event.waitUntil(
-//     createRestDB()
-//     );
-//     console.log('db created');
-//   });
 
 // //  If request is not already in cache,
 self.addEventListener('fetch', function(event) {

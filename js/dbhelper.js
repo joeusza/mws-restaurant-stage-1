@@ -31,37 +31,48 @@ class DBHelper {
 
 
 
-    static fetchRestaurants(callback) {
-        const fetchURL = DBHelper.DATABASE_URL;
-        fetch(fetchURL)
-        // .then(response => response.json())
-        .then(function(response) {
-          dbPromise
-          .then(db => {
-          return db.transaction('restaurants', 'readonly')
-          .objectStore('restaurants').getAll();
-        }).then(function(dbRestaurants) {
-          console.log('all stuffs', dbRestaurants);
-        });
-        return response.json();
-        })
-        // next move getALL to here!
-        // .then(data => callback(null, data))
-        .then(function(restObjs) {
-          dbPromise
-          .then(db => {
-            const tx = db.transaction('restaurants', 'readwrite');
-            const store = tx.objectStore('restaurants');
-            for (const restObj of restObjs) {
-              store.put(restObj);
-            }
-            return tx.complete;
+  static fetchRestaurants(callback) {
+      const fetchURL = DBHelper.DATABASE_URL;
+      dbPromise
+      .then(db => {
+        return db.transaction('restaurants', 'readonly')
+        .objectStore('restaurants').getAll();
+      })
+      .then(function(dbRestaurants) {
+        let restData = dbRestaurants;
+        console.log('restData', restData);
+        if (dbRestaurants.length > 0) {
+          console.log('from idb');
+          console.log(dbRestaurants);
+          return restData;
+        } else {
+          console.log('from fetch');
+          return fetch(fetchURL)
+          .then(function(response) {
+            // console.log(fetchedData);
+            let restData = response.json();
+            return restData;
           });
-          callback(null, restObjs);
-        })
-        .catch(error => callback(`Request failed. Returned ${error}`, null));
-      }
-
+        }
+        console.log('returned', restData);
+        return restData;
+      })
+      // .then(data => callback(null, data))
+      .then(function(restObjs) {
+        console.log('restObjs', restObjs);
+        dbPromise
+        .then(db => {
+          const tx = db.transaction('restaurants', 'readwrite');
+          const store = tx.objectStore('restaurants');
+          for (const restObj of restObjs) {
+            store.put(restObj);
+          }
+          return tx.complete;
+        });
+        callback(null, restObjs);
+      })
+      .catch(error => callback(`Request failed. Returned ${error}`, null));
+    }
 
   /**
    * Fetch a restaurant by its ID.
@@ -199,38 +210,3 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
     }
-
-
-
-
-  // /* static mapMarkerForRestaurant(restaurant, map) {
-  //   const marker = new google.maps.Marker({
-  //     position: restaurant.latlng,
-  //     title: restaurant.name,
-  //     url: DBHelper.urlForRestaurant(restaurant),
-  //     map: map,
-  //     animation: google.maps.Animation.DROP}
-  //   );
-  //   return marker;
-
-  // } */
-
-}
-
-
-  // console.log('store');
-  // const dbPromise = idb.open('rest-db', 1, upgradeDb => {
-  //   const restRevStore = upgradeDb.createObjectStore('restRev');
-  //   restRevStore.put('world', 'hello');
-  // });
-
-
-
-
-    // let dbPromise = idb.open('rest-db', 1, function(upgradeDb) {
-    //   switch(upgradeDb.oldVersion) {
-    //     case 0:
-    //     const restaurantStore = upgradeDb.createObjectStore('restaurant');
-    //     restaurantStore.put("world", "hello");
-    //   }
-    // });
