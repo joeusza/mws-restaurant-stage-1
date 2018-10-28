@@ -40,26 +40,24 @@ class DBHelper {
       })
       .then(function(dbRestaurants) {
         let restData = dbRestaurants;
-        console.log('restData', restData);
+        // console.log('restData', restData);
         if (dbRestaurants.length > 0) {
-          console.log('from idb');
-          console.log(dbRestaurants);
+          // console.log('from idb');
+          // console.log(dbRestaurants);
           return restData;
         } else {
           console.log('from fetch');
           return fetch(fetchURL)
           .then(function(response) {
-            // console.log(fetchedData);
             let restData = response.json();
             return restData;
           });
         }
-        console.log('returned', restData);
+        // console.log('returned', restData);
         return restData;
       })
-      // .then(data => callback(null, data))
       .then(function(restObjs) {
-        console.log('restObjs', restObjs);
+        // console.log('restObjs', restObjs);
         dbPromise
         .then(db => {
           const tx = db.transaction('restaurants', 'readwrite');
@@ -85,7 +83,7 @@ class DBHelper {
       } else {
         const restaurant = restaurants.find(r => r.id == id);
         if (restaurant) { // Got the restaurant
-          console.log(`rest ${restaurant}`);
+          // console.log(`rest ${restaurant}`);
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);

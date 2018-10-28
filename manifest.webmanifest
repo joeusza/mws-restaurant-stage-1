@@ -1,0 +1,11 @@
+{
+"lang": "en-US",
+"short_name": "Rest-Reviews",
+"name": "Udacity Restaurant Reviews Project",
+"start_url": "index.html",
+"display": "fullscreen",
+"orientation": "any",
+"background_color": "#252831",
+"theme_color": "#252831",
+"description": "User submitted restaurant reviews for New York City"
+}
