@@ -194,7 +194,13 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}.jpg`);
+    let photoId = restaurant.photograph;
+    if ((typeof photoId) === 'string') {
+      return (`/img/${photoId}.jpg`);
+    } else {
+      let photoId = restaurant.id.toString();
+      return (`/img/${photoId}.jpg`);
+    }
   }
 
   /**
@@ -210,3 +216,4 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
     }
+}
