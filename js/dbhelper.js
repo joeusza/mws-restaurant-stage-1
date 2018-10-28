@@ -9,6 +9,7 @@ if ('serviceWorker' in navigator) {
     });
   }
 
+// adding of test to see if 'rest-db' has already been created suggested by fellow student 'Laura (MWS)' Laura Franklin
 const dbPromise = idb.open('rest-db', 1, upgradeDB => {
     if (!upgradeDB.objectStoreNames.contains('restaurants')) {
     upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
@@ -31,6 +32,10 @@ class DBHelper {
 
 
   static fetchRestaurants(callback) {
+    /**
+     * implemntation of this function using fetch api and storing data offline based on explanation given in
+     * MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
+     */
       const fetchURL = DBHelper.DATABASE_URL;
       dbPromise
       .then(db => {
@@ -189,6 +194,8 @@ class DBHelper {
 
   /**
    * Restaurant image URL.
+   * Adding of test to subsstitute restaurant.id for restaurant.photograph suggested by fellow student 'Laura (MWS)' Laura Franklin
+   * However the actual code is my own
    */
   static imageUrlForRestaurant(restaurant) {
     let photoId = restaurant.photograph;

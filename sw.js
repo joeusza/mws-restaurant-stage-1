@@ -1,3 +1,7 @@
+// Service Worker implemented following advice given by coach Doug Brown
+// Doug Brown: Webinar 1 https://www.youtube.com/watch?v=92dtrNU1GQc
+// Doug Brown: Webinar 2: UPDATED - YouTube https://www.youtube.com/watch?v=Q2CJYf_XA58&feature=youtu.be
+
 const staticCacheName = 'mws-restaurant-v6';
 const mainAssets = [
   '/',
@@ -58,7 +62,8 @@ if (!event.request.url.includes('restaurants')) {
 //
 // //
   event.respondWith(caches.match(cacheRequest)
-    // problem previously caused by missing parentheses for event.respondWith caches.match(cacheRequest)
+    // Problem previously caused by missing parentheses for event.respondWith caches.match(cacheRequest).
+    // This was fixed after reciving advice from coach Doug Brown.
     //  If request already in the cache, return it.  If not, fetch it, clone it, put the clone in the cache and return it.
     .then(function(response) {
       return response || fetch(cacheRequest)
