@@ -1,20 +1,13 @@
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-    .then(function(reg) {
-    // registration worked
-      console.log(`Registration succeeded. Scope is ${reg.scope}`);
-    }).catch(function(error) {
-    // registration failed
-    console.log(`Registration failed with ${error}`);
-    });
-  }
-
-// adding of test to see if 'rest-db' has already been created suggested by fellow student 'Laura (MWS)' Laura Franklin
-const dbPromise = idb.open('rest-db', 1, upgradeDB => {
-    if (!upgradeDB.objectStoreNames.contains('restaurants')) {
-    upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
-      }
-  });
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/sw.js')
+//     .then(function(reg) {
+//     // registration worked
+//       console.log(`Registration succeeded. Scope is ${reg.scope}`);
+//     }).catch(function(error) {
+//     // registration failed
+//     console.log(`Registration failed with ${error}`);
+//     });
+//   }
 
 /**
  * Common database helper functions.
@@ -24,6 +17,26 @@ class DBHelper {
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
+
+   // code for dbPromise given in Udacity Google Mobile Web Specialist | Webinar MWS PWA Stage 3 | Elisa Romondia Lorenzo Zaccagnini - YouTube
+   // https://www.youtube.com/watch?v=XbCwxeCqxw4
+   static dbPromise() {
+     return idb.open('rest-db', 2, function(upgradeDb) {
+       switch (upgradeDb.oldVersion) {
+         case 0:
+         upgradeDb.createObjectStore('restaurants', {
+          keyPath: 'id'
+        });
+        case 1:
+        const reviewsStore = upgradeDb.createObjectStore('reviews', {
+         keyPath: 'id'
+       });
+       // error-  Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument contains an invalid key path.
+       reviewsStore.createIndex('restaurant', 'restaurant');
+       }
+     })
+   }
+
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
@@ -37,7 +50,7 @@ class DBHelper {
      * MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
      */
       const fetchURL = DBHelper.DATABASE_URL;
-      dbPromise
+      DBHelper.dbPromise()
       .then(db => {
         return db.transaction('restaurants', 'readonly')
         .objectStore('restaurants').getAll();
@@ -45,12 +58,12 @@ class DBHelper {
       .then(function(dbRestaurants) {
         let restData = dbRestaurants;
         // console.log('restData', restData);
-        if (dbRestaurants.length > 0) {
+        if (restData.length > 0) {
           // console.log('from idb');
           // console.log(dbRestaurants);
           return restData;
         } else {
-          console.log('from fetch');
+          // console.log('from fetch');
           return fetch(fetchURL)
           .then(function(response) {
             let restData = response.json();
@@ -62,7 +75,7 @@ class DBHelper {
       })
       .then(function(restObjs) {
         // console.log('restObjs', restObjs);
-        dbPromise
+        DBHelper.dbPromise()
         .then(db => {
           const tx = db.transaction('restaurants', 'readwrite');
           const store = tx.objectStore('restaurants');
@@ -96,9 +109,37 @@ class DBHelper {
     });
   }
 
+
   /**
-   * Fetch restaurants by a cuisine type with proper error handling.
+   * Fetch reviews for each restaurant with proper error handling.
+   * Code taken from https://alexandroperez.github.io/mws-walkthrough/?3.1.getting-reviews-from-new-sails-server by Alexandro Perez
    */
+  static get REVIEWS_URL() {
+    return `http://localhost:1337/reviews/?restaurant_id=`;
+  }
+
+  static fetchReviewsByRestaurantId(restaurant_id) {
+    const revPoint = `${DBHelper.REVIEWS_URL}${restaurant_id}`;
+    console.log(revPoint);
+    return fetch(revPoint)
+    .then(response => {
+      if (!response.ok) return Promise.reject("Reviews couldn't be fetched from network");
+      return response.json();
+    })
+    .then(fetchedReviews => {
+      // if reviews could be fetched from network:
+      // TODO: store reviews on idb
+      console.log(fetchedReviews);
+      return fetchedReviews;
+    })
+    .catch(networkError => {
+      // if reviews couldn't be fetched from network:
+      // TODO: try to get reviews from idb
+      console.log(`${networkError}`);
+      return null; // return null to handle error, as though there are no reviews.
+    });
+  }
+
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
     DBHelper.fetchRestaurants((error, restaurants) => {
@@ -220,4 +261,6 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
     }
+
+
 }
