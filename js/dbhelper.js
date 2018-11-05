@@ -9,18 +9,23 @@
 //     });
 //   }
 
+// const dbPromise =
+//   idb.open('restaurant-reviews-db', 2, function(upgradeDb) {
+//     switch (upgradeDb.oldVersion) {
+//       case 0:
+//         upgradeDb.createObjectStore('restaurants', { keyPath: 'id' });
+//       case 1:
+//         upgradeDb.createObjectStore('reviews', { keyPath: 'id' })
+//            .createIndex('restaurant_id', 'restaurant_id');
+//     }
+//   });
+
 /**
  * Common database helper functions.
  */
 class DBHelper {
-  /**
-   * Database URL.
-   * Change this to restaurants.json file location on your server.
-   */
 
-   // code for dbPromise given in Udacity Google Mobile Web Specialist | Webinar MWS PWA Stage 3 | Elisa Romondia Lorenzo Zaccagnini - YouTube
-   // https://www.youtube.com/watch?v=XbCwxeCqxw4
-   static dbPromise() {
+  static dbPromise() {
      return idb.open('rest-db', 2, function(upgradeDb) {
        switch (upgradeDb.oldVersion) {
          case 0:
@@ -31,18 +36,53 @@ class DBHelper {
         const reviewsStore = upgradeDb.createObjectStore('reviews', {
          keyPath: 'id'
        });
-       // error-  Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument contains an invalid key path.
-       reviewsStore.createIndex('restaurant', 'restaurant');
+       reviewsStore.createIndex('restaurant_id', 'restaurant_id');
        }
-     })
+     });
    }
 
-  static get DATABASE_URL() {
-    const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+  static putReviews(reviews) {
+    console.log('putReviews Version B.5');
+    if (!reviews.push) reviews = [reviews];
+    console.log(reviews);
+    DBHelper.dbPromise()
+    .then(db => {
+      const store = db.transaction('reviews', 'readwrite').objectStore('reviews');
+      Promise.all(reviews.map(networkReview => {
+        console.log(networkReview);
+        return store.get(networkReview.id).then(idbReview => {
+          if (!idbReview || networkReview.updatedAt > idbReview.updatedAt) {
+            return store.put(networkReview);
+          }
+        });
+      })).then(function () {
+        console.log('complete');
+        return store.complete;
+      });
+    });
   }
 
+  /**
+     * Get all reviews for a specific restaurant, by its id, using promises.
+     */
+  static getReviewsForRestaurant(id) {
+    DBHelper.dbPromise()
+    .then(db => {
+      const storeIndex = db.transaction('reviews').objectStore('reviews').index('restaurant_id');
+      return storeIndex.getAll(Number(id));
+      });
+    }
 
+   // code given in https://alexandroperez.github.io/mws-walkthrough/?3.2.upgrading-idb-for-restaurant-reviews by Alexandro Perez
+
+  /**
+   * Get all reviews for a specific restaurant, by its id, using promises.
+   */
+  // code given in https://alexandroperez.github.io/mws-walkthrough/?3.2.upgrading-idb-for-restaurant-reviews by Alexandro Perez
+
+  static get DATABASE_URL() {
+    return `http://localhost:1337/restaurants`;
+  }
 
   static fetchRestaurants(callback) {
     /**
@@ -130,14 +170,20 @@ class DBHelper {
       // if reviews could be fetched from network:
       // TODO: store reviews on idb
       console.log(fetchedReviews);
+      DBHelper.putReviews(fetchedReviews);
       return fetchedReviews;
-    })
-    .catch(networkError => {
-      // if reviews couldn't be fetched from network:
-      // TODO: try to get reviews from idb
-      console.log(`${networkError}`);
-      return null; // return null to handle error, as though there are no reviews.
     });
+    // .catch(networkError => {
+      // if reviews couldn't be fetched from network:
+      // try to get reviews from idb
+      // console.log(`${networkError}, trying idb.`);
+      // DBHelper.getReviewsForRestaurant(restaurant_id)
+      // .then(idbReviews => {
+      //   // if no reviews were found on idb return null
+      //   if (idbReviews.length < 1) return null;
+      //   return idbReviews;
+      // });
+    // });
   }
 
   static fetchRestaurantByCuisine(cuisine, callback) {
