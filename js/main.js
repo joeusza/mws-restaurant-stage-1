@@ -152,6 +152,8 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   addMarkersToMap();
 }
 
+
+
 /**
  * Create restaurant HTML.
  */
@@ -178,6 +180,9 @@ createRestaurantHTML = (restaurant) => {
   const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
   li.append(name);
+
+  const favButton = DBHelper.favoriteButton(restaurant);
+  li.append(favButton);
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;

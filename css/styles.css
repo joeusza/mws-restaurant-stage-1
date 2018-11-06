@@ -32,7 +32,7 @@ a {
 }
 a:hover, a:focus {
 	color: #3397db;
-	text-decoration: none;
+	font-weight: bold;
 }
 a img{
 	border: none 0px #fff;
@@ -163,6 +163,7 @@ nav h1 a {
 	margin: 20px 10px 10px;
   text-transform: uppercase;
   height: 46px;
+  padding-bottom: 10px;
 }
 #restaurants-list p {
   margin: 10px;
@@ -170,8 +171,7 @@ nav h1 a {
 }
 
 #restaurants-list li button {
-  padding: 0px 0px 0px;
-  background-color: orange;
+  background-color: #362f9c;
 }
 
 #restaurants-list li button a {
@@ -183,6 +183,24 @@ nav h1 a {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+/* Default button style when not toggled */
+button.fav {
+  padding: 2.5px 0px 2.5px 0px;
+  background-color: #362f9c;
+  font-size: 20px;
+  color: #fff;
+}
+/* Button style when button is toggled */
+button.fav[aria-pressed=true] {
+  color: red;
+}
+/* Accessible and easy to spot styles for our buttons when hovered and focused */
+button.fav:hover,
+button.fav:focus {
+  color: #01447e;
+  text-decoration: underline;
 }
 
 /* ====================== Restaurant Details ====================== */
@@ -224,6 +242,7 @@ nav h1 a {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  padding-top: 15px;
   padding-bottom: 20px;
 }
 #restaurant-address {

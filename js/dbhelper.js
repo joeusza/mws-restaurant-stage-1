@@ -9,17 +9,6 @@
 //     });
 //   }
 
-// const dbPromise =
-//   idb.open('restaurant-reviews-db', 2, function(upgradeDb) {
-//     switch (upgradeDb.oldVersion) {
-//       case 0:
-//         upgradeDb.createObjectStore('restaurants', { keyPath: 'id' });
-//       case 1:
-//         upgradeDb.createObjectStore('reviews', { keyPath: 'id' })
-//            .createIndex('restaurant_id', 'restaurant_id');
-//     }
-//   });
-
 /**
  * Common database helper functions.
  */
@@ -41,8 +30,26 @@ class DBHelper {
      });
    }
 
+   // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+   static putRestaurants(restaurants, forceUpdate = false) {
+     if (!restaurants.push) restaurants = [restaurants];
+     DBHelper.dbPromise()
+     .then(db => {
+       const store = db.transaction('restaurants', 'readwrite').objectStore('restaurants');
+       Promise.all(restaurants.map(networkRestaurant => {
+         return store.get(networkRestaurant.id).then(idbRestaurant => {
+           if (forceUpdate) return store.put(networkRestaurant);
+           if (!idbRestaurant || new Date(networkRestaurant.updatedAt) > new Date(idbRestaurant.updatedAt)) {
+             return store.put(networkRestaurant);
+           }
+         });
+       })).then(function () {
+         return store.complete;
+       });
+     });
+   }
+
   static putReviews(reviews) {
-    console.log('putReviews Version B.5');
     if (!reviews.push) reviews = [reviews];
     console.log(reviews);
     DBHelper.dbPromise()
@@ -51,7 +58,7 @@ class DBHelper {
       Promise.all(reviews.map(networkReview => {
         console.log(networkReview);
         return store.get(networkReview.id).then(idbReview => {
-          if (!idbReview || networkReview.updatedAt > idbReview.updatedAt) {
+          if (!idbReview || new Date(networkReview.updatedAt) > new Date(idbReview.updatedAt)) {
             return store.put(networkReview);
           }
         });
@@ -172,18 +179,18 @@ class DBHelper {
       console.log(fetchedReviews);
       DBHelper.putReviews(fetchedReviews);
       return fetchedReviews;
-    });
-    // .catch(networkError => {
+    })
+    .catch(networkError => {
       // if reviews couldn't be fetched from network:
       // try to get reviews from idb
-      // console.log(`${networkError}, trying idb.`);
-      // DBHelper.getReviewsForRestaurant(restaurant_id)
-      // .then(idbReviews => {
-      //   // if no reviews were found on idb return null
-      //   if (idbReviews.length < 1) return null;
-      //   return idbReviews;
-      // });
-    // });
+      console.log(`${networkError}, trying idb.`);
+      return DBHelper.getReviewsForRestaurant(restaurant_id)
+      .then(idbReviews => {
+        // if no reviews were found on idb return null
+        if (idbReviews.length < 1) return null;
+        return idbReviews;
+      });
+    });
   }
 
   static fetchRestaurantByCuisine(cuisine, callback) {
@@ -308,5 +315,38 @@ class DBHelper {
     return marker;
     }
 
+    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+    static handleClick() {
+      const restaurantId = this.dataset.id;
+      const fav = this.getAttribute('aria-pressed') == 'true';
+      const url = `${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${!fav}`;
+      const PUT = {method: 'PUT'};
+
+      // TODO: use Background Sync to sync data with API server
+      return fetch(url, PUT).then(response => {
+        if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
+        return response.json();
+      }).then(updatedRestaurant => {
+        // update restaurant on idb
+        DBHelper.dbPromise()
+        .then(function(restData) {
+          DBHelper.putRestaurants(updatedRestaurant, true);
+        });
+        // change state of toggle button
+        this.setAttribute('aria-pressed', !fav);
+      });
+    }
+
+    static favoriteButton(restaurant) {
+      const button = document.createElement('button');
+      button.innerHTML = "&#x2764;"; // this is the heart symbol in hex code
+      button.className = "fav"; // you can use this class name to style your button
+      button.dataset.id = restaurant.id; // store restaurant id in dataset for later
+      button.setAttribute('aria-label', `Mark ${restaurant.name} as a favorite`);
+      button.setAttribute('aria-pressed', restaurant.is_favorite);
+      button.onclick = DBHelper.handleClick;
+
+      return button;
+    }
 
 }
