@@ -31,8 +31,8 @@ a {
   min-height: 1.5em;
 }
 a:hover, a:focus {
-	color: #3397db;
-	font-weight: bold;
+	/* color: gold;
+	font-weight: bold; */
 }
 a img{
 	border: none 0px #fff;
@@ -197,11 +197,19 @@ button.fav[aria-pressed=true] {
   color: red;
 }
 /* Accessible and easy to spot styles for our buttons when hovered and focused */
-button.fav:hover,
+/* button.fav:hover,
 button.fav:focus {
-  color: #01447e;
+  outline-style: dashed;
+  outline-color: gold;
+  outline-width: medium;
+  outline-offset: 10px
+} */
+
+/* #fav-button-container:hover,
+#fav-button-container:focus {
+  color: #3397db;
   text-decoration: underline;
-}
+} */
 
 /* ====================== Restaurant Details ====================== */
 
