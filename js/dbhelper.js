@@ -1,13 +1,13 @@
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/sw.js')
-//     .then(function(reg) {
-//     // registration worked
-//       console.log(`Registration succeeded. Scope is ${reg.scope}`);
-//     }).catch(function(error) {
-//     // registration failed
-//     console.log(`Registration failed with ${error}`);
-//     });
-//   }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+    .then(function(reg) {
+    // registration worked
+      console.log(`Registration succeeded. Scope is ${reg.scope}`);
+    }).catch(function(error) {
+    // registration failed
+    console.log(`Registration failed with ${error}`);
+    });
+  }
 
 /**
  * Common database helper functions.
@@ -436,7 +436,7 @@ class DBHelper {
 
       console.log(review);
 
-      const url = `${DBHelper.DATABASE_URL}/reviews/`;
+      const url = `http://localhost:1337/reviews/`;
       console.log(url);
       const POST = {
         method: 'POST',
@@ -449,7 +449,8 @@ class DBHelper {
         return response.json();
       }).then(newNetworkReview => {
         // save new review on idb
-        DBHelper.dbPromise().putReviews(newNetworkReview);
+        console.log(newNetworkReview);
+        DBHelper.putReviews(newNetworkReview);
         // post new review on page
         const reviewList = document.getElementById('reviews-list');
         const review = DBHelper.createReviewHTML(newNetworkReview);
