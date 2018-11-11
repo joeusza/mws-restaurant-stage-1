@@ -51,6 +51,9 @@ self.addEventListener('activate', function(event) {
 
 // //  If request is not already in cache,
 self.addEventListener('fetch', function(event) {
+  if (event.request.url === 'http://localhost:1337/reviews/') {
+    return;
+  }
 if (!event.request.url.includes('restaurants')) {
   // console.log('sw caching', event.request.url);
   let cacheRequest = event.request;

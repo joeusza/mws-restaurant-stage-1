@@ -97,6 +97,7 @@ class DBHelper {
      * MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
      */
       const fetchURL = DBHelper.DATABASE_URL;
+      console.log('Its Sunday version 18')
       DBHelper.dbPromise()
       .then(db => {
         return db.transaction('restaurants', 'readonly')
@@ -315,16 +316,17 @@ class DBHelper {
     return marker;
     }
 
-    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
-    static handleClick() {
-      const restaurantId = this.dataset.id;
-      const fav = this.getAttribute('aria-pressed') == 'true';
-      const url = `${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${!fav}`;
+    static sendFavWhenOnline(offline_fav) {
+      console.log(Object.values(offline_fav));
+      localStorage.setItem('data', JSON.stringify(offline_fav.data));
+    }
+
+    static putFav(url) {
       const PUT = {method: 'PUT'};
 
-      // TODO: use Background Sync to sync data with API server
       return fetch(url, PUT).then(response => {
         if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
+        console.log(response.clone().json());
         return response.json();
       }).then(updatedRestaurant => {
         // update restaurant on idb
@@ -333,8 +335,42 @@ class DBHelper {
           DBHelper.putRestaurants(updatedRestaurant, true);
         });
         // change state of toggle button
-        this.setAttribute('aria-pressed', !fav);
+        // this.setAttribute('aria-pressed', !fav);
       });
+    }
+
+    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+    static handleClick() {
+      const restaurantId = this.dataset.id;
+      const fav = this.getAttribute('aria-pressed') == 'true';
+      const url = `${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${!fav}`;
+      this.setAttribute('aria-pressed', !fav);
+      let offline_fav = {
+        name: 'changeFav',
+        data: url,
+        object_type: 'favStatus'
+        }
+      if (!navigator.onLine && offline_fav.name === 'changeFav') {
+        console.log(Object.values(offline_fav));
+        DBHelper.sendFavWhenOnline(offline_fav);
+        return;
+      }
+      DBHelper.putFav(url);
+      // const PUT = {method: 'PUT'};
+      //
+      // return fetch(url, PUT).then(response => {
+      //   if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
+      //   console.log(response.clone().json());
+      //   return response.json();
+      // }).then(updatedRestaurant => {
+      //   // update restaurant on idb
+      //   DBHelper.dbPromise()
+      //   .then(function(restData) {
+      //     DBHelper.putRestaurants(updatedRestaurant, true);
+      //   });
+      //   // change state of toggle button
+      //   // this.setAttribute('aria-pressed', !fav);
+      // });
     }
 
     static favoriteButton(restaurant) {
@@ -355,6 +391,13 @@ class DBHelper {
      */
     static createReviewHTML(review) {
       const li = document.createElement('li');
+      if (!navigator.onLine) {
+        const connection_status = document.createElement('p');
+        connection_status.classList.add('offline_label');
+        connection_status.innerHTML = 'Offline'
+        li.classList.add('reviews_offline')
+        li.appendChild(connection_status);
+      }
       const name = document.createElement('p');
       name.innerHTML = review.name;
       li.appendChild(name);
@@ -373,6 +416,33 @@ class DBHelper {
 
       return li;
     }
+
+    // static createOfflineReviewHTML(review) {
+    //   const li = document.createElement('li');
+    //     const connection_status = document.createElement('p');
+    //     connection_status.classList.add('offline_label');
+    //     connection_status.innerHTML = 'Offline'
+    //     li.classList.add('reviews_offline')
+    //     li.appendChild(connection_status);
+    //   const name = document.createElement('p');
+    //   name.innerHTML = review.name;
+    //   li.appendChild(name);
+    //
+    //   const date = document.createElement('p');
+    //   date.innerHTML = new Date(review.createdAt).toLocaleDateString();
+    //   li.appendChild(date);
+    //
+    //   const rating = document.createElement('p');
+    //   rating.innerHTML = `Rating: ${review.rating}`;
+    //   li.appendChild(rating);
+    //
+    //   const comments = document.createElement('p');
+    //   comments.innerHTML = review.comments;
+    //   li.appendChild(comments);
+    //
+    //   return li;
+    //
+    // }
 
     /**
      * Clear form data
@@ -429,36 +499,74 @@ class DBHelper {
     /**
      * Handle submit.
      */
+
+     static postReview(review) {
+       const url = `http://localhost:1337/reviews/`;
+       console.log(url);
+       const POST = {
+         method: 'POST',
+         body: JSON.stringify(review)
+       };
+       // TODO: use Background Sync to sync data with API server
+       return fetch(url, POST).then(response => {
+         if (!response.ok) return Promise.reject("We couldn't post review to server.");
+         return response.json();
+       }).then(newNetworkReview => {
+         // save new review on idb
+         console.log(newNetworkReview);
+         DBHelper.putReviews(newNetworkReview);
+         // post new review on page
+         // const reviewList = document.getElementById('reviews-list');
+         // const review = DBHelper.createReviewHTML(newNetworkReview);
+         // reviewList.appendChild(review);
+         // DBHelper.clearForm();
+       });
+     }
+
+     static sendDataWhenOnline(offline_obj) {
+       console.log(Object.values(offline_obj));
+       localStorage.setItem('data', JSON.stringify(offline_obj.data));
+
+       window.addEventListener('online', (event) => {
+         console.log('online again!');
+         let data = JSON.parse(localStorage.getItem('data'));
+         console.log(data);
+         [...document.querySelectorAll(".reviews_offline")]
+         .forEach(el => {
+           el.classList.remove('reviews_offline');
+           el.querySelector('.offline_label').remove();
+         });
+         console.log('did it!');
+         if (data !== null) {
+           if (offline_obj.name === 'addReview') {
+             console.log(offline_obj.data);
+             DBHelper.postReview(offline_obj.data);
+           }
+          localStorage.removeItem('data');
+         }
+       });
+     }
+
     static handleSubmit(e) {
       e.preventDefault();
-      const review = DBHelper.validateAndGetData();
-      if (!review) return;
-
-      console.log(review);
-
-      const url = `http://localhost:1337/reviews/`;
-      console.log(url);
-      const POST = {
-        method: 'POST',
-        body: JSON.stringify(review)
-      };
-
-      // TODO: use Background Sync to sync data with API server
-      return fetch(url, POST).then(response => {
-        if (!response.ok) return Promise.reject("We couldn't post review to server.");
-        return response.json();
-      }).then(newNetworkReview => {
-        // save new review on idb
-        console.log(newNetworkReview);
-        DBHelper.putReviews(newNetworkReview);
-        // post new review on page
-        const reviewList = document.getElementById('reviews-list');
-        const review = DBHelper.createReviewHTML(newNetworkReview);
-        reviewList.appendChild(review);
-        // clear form
-        DBHelper.clearForm();
-      });
-
+      const newReview = DBHelper.validateAndGetData();
+      if (!newReview) return;
+      console.log(`new review ${newReview}`);
+      let offline_obj = {
+        name: 'addReview',
+        data: newReview,
+        object_type: 'review'
+        }
+      console.log(Object.values(offline_obj));
+      const reviewList = document.getElementById('reviews-list');
+      const review = DBHelper.createReviewHTML(newReview);
+      reviewList.appendChild(review);
+      DBHelper.clearForm();
+      if (!navigator.onLine && offline_obj.name === 'addReview') {
+        DBHelper.sendDataWhenOnline(offline_obj);
+        return;
+      }
+      DBHelper.postReview(newReview);
     }
 
     /**

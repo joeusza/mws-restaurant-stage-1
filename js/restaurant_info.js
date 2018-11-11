@@ -130,6 +130,7 @@ fillReviewsHTML = (reviews) => {
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
+
   if (!reviews) {
       const noReviews = document.createElement('p');
       noReviews.innerHTML = 'No reviews yet!';
@@ -154,6 +155,7 @@ fillReviewsHTML = (reviews) => {
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
+  
   const name = document.createElement('p');
   name.innerHTML = review.name;
   li.appendChild(name);
