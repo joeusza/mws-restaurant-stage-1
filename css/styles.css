@@ -185,6 +185,40 @@ nav h1 a {
   text-transform: uppercase;
 }
 
+#review-form {
+    width: 80%;
+}
+
+#name {
+  padding: 5px 20px 5px;
+  font-size: 16px;
+}
+
+#rating {
+  padding: 5px 10px 5px;
+  font-size: 16px;
+}
+
+#comments {
+  width: 100%;
+  font-size: 16px;
+}
+
+#submitP {
+    display: flex;
+}
+
+.add-review {
+  background-color: #362f9c;
+  color: #fff;
+  padding: 15px 40px 20px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Default button style when not toggled */
 button.fav {
   padding: 2.5px 0px 2.5px 0px;
@@ -196,20 +230,6 @@ button.fav {
 button.fav[aria-pressed=true] {
   color: red;
 }
-/* Accessible and easy to spot styles for our buttons when hovered and focused */
-/* button.fav:hover,
-button.fav:focus {
-  outline-style: dashed;
-  outline-color: gold;
-  outline-width: medium;
-  outline-offset: 10px
-} */
-
-/* #fav-button-container:hover,
-#fav-button-container:focus {
-  color: #3397db;
-  text-decoration: underline;
-} */
 
 /* ====================== Restaurant Details ====================== */
 

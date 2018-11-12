@@ -51,19 +51,19 @@ class DBHelper {
 
   static putReviews(reviews) {
     if (!reviews.push) reviews = [reviews];
-    console.log(reviews);
+    // console.log(reviews);
     DBHelper.dbPromise()
     .then(db => {
       const store = db.transaction('reviews', 'readwrite').objectStore('reviews');
       Promise.all(reviews.map(networkReview => {
-        console.log(networkReview);
+        // console.log(networkReview);
         return store.get(networkReview.id).then(idbReview => {
           if (!idbReview || new Date(networkReview.updatedAt) > new Date(idbReview.updatedAt)) {
             return store.put(networkReview);
           }
         });
       })).then(function () {
-        console.log('complete');
+        // console.log('complete');
         return store.complete;
       });
     });
@@ -80,12 +80,9 @@ class DBHelper {
       });
     }
 
-   // code given in https://alexandroperez.github.io/mws-walkthrough/?3.2.upgrading-idb-for-restaurant-reviews by Alexandro Perez
-
   /**
    * Get all reviews for a specific restaurant, by its id, using promises.
    */
-  // code given in https://alexandroperez.github.io/mws-walkthrough/?3.2.upgrading-idb-for-restaurant-reviews by Alexandro Perez
 
   static get DATABASE_URL() {
     return `http://localhost:1337/restaurants`;
@@ -97,7 +94,7 @@ class DBHelper {
      * MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
      */
       const fetchURL = DBHelper.DATABASE_URL;
-      console.log('Its Sunday version 42')
+      console.log('release candidate');
       DBHelper.dbPromise()
       .then(db => {
         return db.transaction('restaurants', 'readonly')
@@ -105,24 +102,18 @@ class DBHelper {
       })
       .then(function(dbRestaurants) {
         let restData = dbRestaurants;
-        // console.log('restData', restData);
         if (restData.length > 0) {
-          // console.log('from idb');
-          // console.log(dbRestaurants);
           return restData;
         } else {
-          // console.log('from fetch');
           return fetch(fetchURL)
           .then(function(response) {
             let restData = response.json();
             return restData;
           });
         }
-        // console.log('returned', restData);
         return restData;
       })
       .then(function(restObjs) {
-        // console.log('restObjs', restObjs);
         DBHelper.dbPromise()
         .then(db => {
           const tx = db.transaction('restaurants', 'readwrite');
@@ -148,7 +139,6 @@ class DBHelper {
       } else {
         const restaurant = restaurants.find(r => r.id == id);
         if (restaurant) { // Got the restaurant
-          // console.log(`rest ${restaurant}`);
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
@@ -160,7 +150,7 @@ class DBHelper {
 
   /**
    * Fetch reviews for each restaurant with proper error handling.
-   * Code taken from https://alexandroperez.github.io/mws-walkthrough/?3.1.getting-reviews-from-new-sails-server by Alexandro Perez
+   * Code given in https://alexandroperez.github.io/mws-walkthrough/?3.1.getting-reviews-from-new-sails-server by Alexandro Perez
    */
   static get REVIEWS_URL() {
     return `http://localhost:1337/reviews/?restaurant_id=`;
@@ -168,7 +158,6 @@ class DBHelper {
 
   static fetchReviewsByRestaurantId(restaurant_id) {
     const revPoint = `${DBHelper.REVIEWS_URL}${restaurant_id}`;
-    console.log(revPoint);
     return fetch(revPoint)
     .then(response => {
       if (!response.ok) return Promise.reject("Reviews couldn't be fetched from network");
@@ -176,7 +165,7 @@ class DBHelper {
     })
     .then(fetchedReviews => {
       // if reviews could be fetched from network:
-      console.log(fetchedReviews);
+      // console.log(fetchedReviews);
       DBHelper.putReviews(fetchedReviews);
       return fetchedReviews;
     })
@@ -315,48 +304,9 @@ class DBHelper {
     return marker;
     }
 
-    // static sendFavWhenOnline(fav, offline_fav) {
-    //   console.log(Object.values(offline_fav));
-    //   const offlineFavorite = offline_fav.data;
-    //   console.log(offlineFavorite);
-    //   let favHistory = JSON.parse(localStorage.getItem('favoritesWaitHere')) || [];
-    //    favHistory.push(offlineFavorite);
-    //    localStorage.setItem('favoritesWaitHere', JSON.stringify(favHistory));
-    //
-    //     window.addEventListener('online', (event) => {
-    //       console.log('online again!');
-    //        // let data = JSON.parse(localStorage.getItem('data'));
-    //        let retrievedFavs = localStorage.getItem('favoritesWaitHere');
-    //        retrievedFavs = JSON.parse(retrievedFavs);
-    //        console.log(`${typeof retrievedFavs} ${retrievedFavs}`);
-    //       // macy need to do CSS stuff there
-    //       if (retrievedFavs !== null && retrievedFavs.length > 0) {
-    //       console.log(retrievedFavs);
-    //       for (const retrievedFav of retrievedFavs) {
-    //         const PUT = {method: 'PUT'};
-    //
-    //         return fetch(retrievedFav, PUT).then(response => {
-    //           if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
-    //           console.log(response.clone().json());
-    //           return response.json();
-    //         }).then(updatedRestaurant => {
-    //           // update restaurant on idb
-    //           DBHelper.dbPromise()
-    //           .then(function(restData) {
-    //             DBHelper.putRestaurants(updatedRestaurant, true);
-    //           });
-    //           // change state of toggle button
-    //           const gotButton = document.getElementById("fButton")
-    //           gotButton.setAttribute('aria-pressed', !fav);
-    //         });
-    //       }
-    //      localStorage.removeItem('favoritesWaitHere');
-    //     }
-    //   });
-    // }
 
-
-    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+    // code inspired by code given in given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+    // and MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
     static handleClick() {
       const restaurantId = this.dataset.id;
       const fav = this.getAttribute('aria-pressed') == 'true';
@@ -367,17 +317,11 @@ class DBHelper {
         data: url,
         object_type: 'favStatus'
         }
-      // if (!navigator.onLine && offline_fav.name === 'changeFav') {
-      //   console.log(Object.values(offline_fav));
-      //   DBHelper.sendFavWhenOnline(fav, offline_fav);
-      //   return;
-      // }
-      // DBHelper.putFav(fav, url);
+
       const PUT = {method: 'PUT'};
 
       return fetch(url, PUT).then(response => {
         if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
-        console.log(response.clone().json());
         return response.json();
       }).then(updatedRestaurant => {
         // update restaurant on idb
@@ -392,7 +336,6 @@ class DBHelper {
 
     static favoriteButton(restaurant) {
       const button = document.createElement('button');
-      button.id ="fButton";
       button.innerHTML = "&#x2764;"; // this is the heart symbol in hex code
       button.className = "fav"; // you can use this class name to style your button
       button.dataset.id = restaurant.id; // store restaurant id in dataset for later
@@ -434,33 +377,6 @@ class DBHelper {
 
       return li;
     }
-
-    // static createOfflineReviewHTML(review) {
-    //   const li = document.createElement('li');
-    //     const connection_status = document.createElement('p');
-    //     connection_status.classList.add('offline_label');
-    //     connection_status.innerHTML = 'Offline'
-    //     li.classList.add('reviews_offline')
-    //     li.appendChild(connection_status);
-    //   const name = document.createElement('p');
-    //   name.innerHTML = review.name;
-    //   li.appendChild(name);
-    //
-    //   const date = document.createElement('p');
-    //   date.innerHTML = new Date(review.createdAt).toLocaleDateString();
-    //   li.appendChild(date);
-    //
-    //   const rating = document.createElement('p');
-    //   rating.innerHTML = `Rating: ${review.rating}`;
-    //   li.appendChild(rating);
-    //
-    //   const comments = document.createElement('p');
-    //   comments.innerHTML = review.comments;
-    //   li.appendChild(comments);
-    //
-    //   return li;
-    //
-    // }
 
     /**
      * Clear form data
@@ -520,7 +436,6 @@ class DBHelper {
 
      static postReview(review) {
        const url = `http://localhost:1337/reviews/`;
-       console.log(url);
        const POST = {
          method: 'POST',
          body: JSON.stringify(review)
@@ -530,38 +445,33 @@ class DBHelper {
          return response.json();
        }).then(newNetworkReview => {
          // save new review on idb
-         console.log(newNetworkReview);
+         // console.log(newNetworkReview);
          DBHelper.putReviews(newNetworkReview);
-         // post new review on page
-         // const reviewList = document.getElementById('reviews-list');
-         // const review = DBHelper.createReviewHTML(newNetworkReview);
-         // reviewList.appendChild(review);
-         // DBHelper.clearForm();
        });
      }
 
+     // inspired by doe given in MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
      static sendDataWhenOnline(offline_obj) {
-       console.log(Object.values(offline_obj));
+       // console.log(Object.values(offline_obj));
        const offlineReview = offline_obj.data;
-       console.log(offlineReview);
+       // console.log(offlineReview);
+       // scheme for storing values in arrays in local storage given in https://stackoverflow.com/questions/40843773/localstorage-keeps-overwriting-my-data
        let revHistory = JSON.parse(localStorage.getItem('reviewsWaitHere')) || [];
        revHistory.push(offlineReview);
        localStorage.setItem('reviewsWaitHere', JSON.stringify(revHistory));
 
        window.addEventListener('online', (event) => {
-         console.log('online again!');
-         // let data = JSON.parse(localStorage.getItem('data'));
+         // console.log('online again!');
          let retrievedReviews = localStorage.getItem('reviewsWaitHere');
          retrievedReviews = JSON.parse(retrievedReviews);
-         console.log(`${typeof retrievedReviews} ${retrievedReviews}`);
+         // console.log(`${typeof retrievedReviews} ${retrievedReviews}`);
          [...document.querySelectorAll(".reviews_offline")]
          .forEach(el => {
            el.classList.remove('reviews_offline');
            el.querySelector('.offline_label').remove();
          });
-         console.log('did it!');
          if (retrievedReviews !== null && retrievedReviews.length > 0) {
-           console.log(retrievedReviews);
+           // console.log(retrievedReviews);
            for (const retrievedReview of retrievedReviews) {
              DBHelper.postReview(retrievedReview);
            }
@@ -570,19 +480,19 @@ class DBHelper {
        });
      }
 
+     // * Code given inhttps://alexandroperez.github.io/mws-walkthrough/?3.4.adding-a-form-for-new-reviews by Alexandro Perez
     static handleSubmit(e) {
       e.preventDefault();
       const newReview = DBHelper.validateAndGetData();
       if (!newReview) return;
-      console.log(`new review
-        `);
+      // console.log(`new review`);
       let offline_obj = {
         name: 'addReview',
         // key: newReview.id;
         data: newReview,
         object_type: 'review'
         }
-      console.log(Object.values(offline_obj));
+      // console.log(Object.values(offline_obj));
       const reviewList = document.getElementById('reviews-list');
       const review = DBHelper.createReviewHTML(newReview);
       reviewList.appendChild(review);
@@ -640,11 +550,13 @@ class DBHelper {
       form.appendChild(p);
 
       p = document.createElement('p');
+      p.setAttribute('id', 'submitP')
       const addButton = document.createElement('button');
       addButton.setAttribute('type', 'submit');
       addButton.setAttribute('aria-label', 'Add Review');
       addButton.classList.add('add-review');
-      addButton.innerHTML = "<span>+</span>";
+      // addButton.innerHTML = "<span>+</span>";
+      addButton.innerHTML = "<span>Submit Review</span>";
       p.appendChild(addButton);
       form.appendChild(p);
 
