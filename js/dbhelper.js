@@ -97,7 +97,7 @@ class DBHelper {
      * MWS Restaurant App - Stage 2 Webinar with Darren https://www.youtube.com/watch?v=S7UGidduflQ
      */
       const fetchURL = DBHelper.DATABASE_URL;
-      console.log('Its Sunday version 18')
+      console.log('Its Sunday version 42')
       DBHelper.dbPromise()
       .then(db => {
         return db.transaction('restaurants', 'readonly')
@@ -176,7 +176,6 @@ class DBHelper {
     })
     .then(fetchedReviews => {
       // if reviews could be fetched from network:
-      // TODO: store reviews on idb
       console.log(fetchedReviews);
       DBHelper.putReviews(fetchedReviews);
       return fetchedReviews;
@@ -316,12 +315,64 @@ class DBHelper {
     return marker;
     }
 
-    static sendFavWhenOnline(offline_fav) {
-      console.log(Object.values(offline_fav));
-      localStorage.setItem('data', JSON.stringify(offline_fav.data));
-    }
+    // static sendFavWhenOnline(fav, offline_fav) {
+    //   console.log(Object.values(offline_fav));
+    //   const offlineFavorite = offline_fav.data;
+    //   console.log(offlineFavorite);
+    //   let favHistory = JSON.parse(localStorage.getItem('favoritesWaitHere')) || [];
+    //    favHistory.push(offlineFavorite);
+    //    localStorage.setItem('favoritesWaitHere', JSON.stringify(favHistory));
+    //
+    //     window.addEventListener('online', (event) => {
+    //       console.log('online again!');
+    //        // let data = JSON.parse(localStorage.getItem('data'));
+    //        let retrievedFavs = localStorage.getItem('favoritesWaitHere');
+    //        retrievedFavs = JSON.parse(retrievedFavs);
+    //        console.log(`${typeof retrievedFavs} ${retrievedFavs}`);
+    //       // macy need to do CSS stuff there
+    //       if (retrievedFavs !== null && retrievedFavs.length > 0) {
+    //       console.log(retrievedFavs);
+    //       for (const retrievedFav of retrievedFavs) {
+    //         const PUT = {method: 'PUT'};
+    //
+    //         return fetch(retrievedFav, PUT).then(response => {
+    //           if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
+    //           console.log(response.clone().json());
+    //           return response.json();
+    //         }).then(updatedRestaurant => {
+    //           // update restaurant on idb
+    //           DBHelper.dbPromise()
+    //           .then(function(restData) {
+    //             DBHelper.putRestaurants(updatedRestaurant, true);
+    //           });
+    //           // change state of toggle button
+    //           const gotButton = document.getElementById("fButton")
+    //           gotButton.setAttribute('aria-pressed', !fav);
+    //         });
+    //       }
+    //      localStorage.removeItem('favoritesWaitHere');
+    //     }
+    //   });
+    // }
 
-    static putFav(url) {
+
+    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
+    static handleClick() {
+      const restaurantId = this.dataset.id;
+      const fav = this.getAttribute('aria-pressed') == 'true';
+      const url = `${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${!fav}`;
+      // this.setAttribute('aria-pressed', !fav);
+      let offline_fav = {
+        name: 'changeFav',
+        data: url,
+        object_type: 'favStatus'
+        }
+      // if (!navigator.onLine && offline_fav.name === 'changeFav') {
+      //   console.log(Object.values(offline_fav));
+      //   DBHelper.sendFavWhenOnline(fav, offline_fav);
+      //   return;
+      // }
+      // DBHelper.putFav(fav, url);
       const PUT = {method: 'PUT'};
 
       return fetch(url, PUT).then(response => {
@@ -335,46 +386,13 @@ class DBHelper {
           DBHelper.putRestaurants(updatedRestaurant, true);
         });
         // change state of toggle button
-        // this.setAttribute('aria-pressed', !fav);
+        this.setAttribute('aria-pressed', !fav);
       });
-    }
-
-    // code given in https://alexandroperez.github.io/mws-walkthrough/?3.3.favorite-restaurants-using-accessible-toggle-buttons by Alexandro Perez
-    static handleClick() {
-      const restaurantId = this.dataset.id;
-      const fav = this.getAttribute('aria-pressed') == 'true';
-      const url = `${DBHelper.DATABASE_URL}/${restaurantId}/?is_favorite=${!fav}`;
-      this.setAttribute('aria-pressed', !fav);
-      let offline_fav = {
-        name: 'changeFav',
-        data: url,
-        object_type: 'favStatus'
-        }
-      if (!navigator.onLine && offline_fav.name === 'changeFav') {
-        console.log(Object.values(offline_fav));
-        DBHelper.sendFavWhenOnline(offline_fav);
-        return;
-      }
-      DBHelper.putFav(url);
-      // const PUT = {method: 'PUT'};
-      //
-      // return fetch(url, PUT).then(response => {
-      //   if (!response.ok) return Promise.reject("We couldn't mark restaurant as favorite.");
-      //   console.log(response.clone().json());
-      //   return response.json();
-      // }).then(updatedRestaurant => {
-      //   // update restaurant on idb
-      //   DBHelper.dbPromise()
-      //   .then(function(restData) {
-      //     DBHelper.putRestaurants(updatedRestaurant, true);
-      //   });
-      //   // change state of toggle button
-      //   // this.setAttribute('aria-pressed', !fav);
-      // });
     }
 
     static favoriteButton(restaurant) {
       const button = document.createElement('button');
+      button.id ="fButton";
       button.innerHTML = "&#x2764;"; // this is the heart symbol in hex code
       button.className = "fav"; // you can use this class name to style your button
       button.dataset.id = restaurant.id; // store restaurant id in dataset for later
@@ -507,7 +525,6 @@ class DBHelper {
          method: 'POST',
          body: JSON.stringify(review)
        };
-       // TODO: use Background Sync to sync data with API server
        return fetch(url, POST).then(response => {
          if (!response.ok) return Promise.reject("We couldn't post review to server.");
          return response.json();
@@ -525,24 +542,30 @@ class DBHelper {
 
      static sendDataWhenOnline(offline_obj) {
        console.log(Object.values(offline_obj));
-       localStorage.setItem('data', JSON.stringify(offline_obj.data));
+       const offlineReview = offline_obj.data;
+       console.log(offlineReview);
+       let revHistory = JSON.parse(localStorage.getItem('reviewsWaitHere')) || [];
+       revHistory.push(offlineReview);
+       localStorage.setItem('reviewsWaitHere', JSON.stringify(revHistory));
 
        window.addEventListener('online', (event) => {
          console.log('online again!');
-         let data = JSON.parse(localStorage.getItem('data'));
-         console.log(data);
+         // let data = JSON.parse(localStorage.getItem('data'));
+         let retrievedReviews = localStorage.getItem('reviewsWaitHere');
+         retrievedReviews = JSON.parse(retrievedReviews);
+         console.log(`${typeof retrievedReviews} ${retrievedReviews}`);
          [...document.querySelectorAll(".reviews_offline")]
          .forEach(el => {
            el.classList.remove('reviews_offline');
            el.querySelector('.offline_label').remove();
          });
          console.log('did it!');
-         if (data !== null) {
-           if (offline_obj.name === 'addReview') {
-             console.log(offline_obj.data);
-             DBHelper.postReview(offline_obj.data);
+         if (retrievedReviews !== null && retrievedReviews.length > 0) {
+           console.log(retrievedReviews);
+           for (const retrievedReview of retrievedReviews) {
+             DBHelper.postReview(retrievedReview);
            }
-          localStorage.removeItem('data');
+          localStorage.removeItem('reviewsWaitHere');
          }
        });
      }
@@ -551,9 +574,11 @@ class DBHelper {
       e.preventDefault();
       const newReview = DBHelper.validateAndGetData();
       if (!newReview) return;
-      console.log(`new review ${newReview}`);
+      console.log(`new review
+        `);
       let offline_obj = {
         name: 'addReview',
+        // key: newReview.id;
         data: newReview,
         object_type: 'review'
         }
